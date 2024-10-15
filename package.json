@@ -12,6 +12,7 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "paytmchecksum": "^1.5.1",
-    "razorpay": "^2.9.4"
+    "razorpay": "^2.9.4",
+    "request": "^2.88.2"
   }
 }

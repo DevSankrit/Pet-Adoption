@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report a Bug</title>
+    <link rel="stylesheet" href="dashboardcss.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+
+    <style>
+        .container-second {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            margin-left: 25%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            color: #7380ec;
+        }
+
+        .name-label, 
+        .email-label, 
+        .label-bug {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 600;
+        }
+
+        input[type="text"], 
+        input[type="email"], 
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus, 
+        input[type="email"]:focus, 
+        textarea:focus {
+            border-color: #7380ec;
+            outline: none;
+        }
+
+        textarea {
+            height: 150px;
+            resize: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #7380ec;
+            color: white;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #5160eb;
+        }
+
+        .submit-btn:focus {
+            outline: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        @media(max-width: 768px) {
+            .container-second {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .submit-btn {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <aside>
+        <div class="top">
+            <div class="logo">
+                <h2>RESCUE <span class="primary">HEARTS</span>❤</h2>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-symbols-outlined"> close </span>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <a href="/dashboard">
+                <span class="material-symbols-outlined"> grid_view </span>
+                <h3>Dashboard</h3>
+            </a>
+
+            <a href="/addpet">
+                <span class="material-symbols-outlined"> person_outline </span>
+                <h3>Add Pet</h3>
+            </a>
+
+            <a href="/managepets">
+                <span class="material-symbols-outlined"> insights </span>
+                <h3>Manage Pets</h3>
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined"> mail_outline </span>
+                <h3>Messages</h3>
+                <span class="msg-count">14</span>
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined"> receipt_long </span>
+                <h3>Shelter Stats</h3>
+            </a>
+
+            <a href="#"  class="active">
+                <span class="material-symbols-outlined"> report_gmailerrorred </span>
+                <h3>Reports</h3>
+            </a>
+            <a href="" id="logout-link">
+                <span class="material-symbols-outlined"> logout </span>
+                <h3>Logout</h3>
+            </a>
+        </div>
+    </aside>
+    <div class="container-second">
+        <h1>Report a Bug</h1>
+        <form action="/submit-bug-report" method="POST">
+            <div class="form-group">
+                <label for="name" class="name-label">Your Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="email" class="email-label">Your Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="bug-description" class="label-bug">Bug Description</label>
+                <textarea style="    font-family: 'Poppins', sans-serif;
+" id="bug-description" name="description" placeholder="Describe the bug in detail" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Submit Bug Report</button>
+        </form>
+    </div>
+    </div>
+</body>
+</html>

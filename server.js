@@ -10,8 +10,11 @@ const flash = require('connect-flash'); // For flash messages
 const multer = require('./config/multer'); // Import multer config
 const Pet = require('./Model/petmodel');  // Adjust the path as necessary
 const petRoutes = require('./routes/petRoutes'); // Import pet routes
-const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const paytmConfig = require('./config/paytmconfig');
+const PaytmChecksum = require('paytmchecksum');
+const request = require('request');
+const Adoption = require('./Model/adoption'); // Adjust the path based on your file structure
 
 
 
@@ -19,13 +22,7 @@ const crypto = require('crypto');
 const addPetController = require('./servers/addPetController');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-    key_id: 'YOUR_TEST_KEY_ID', // Replace with your Razorpay Test API Key
-    key_secret: 'YOUR_TEST_KEY_SECRET', // Replace with your Razorpay Test API Secret
-  });
+const PORT = process.env.PORT || 5000;  
 
 app.set('view engine', 'ejs');  // Use EJS as the template engine
 
@@ -131,6 +128,9 @@ app.get('/petslist', (req, res) => {
 app.get('/addpet', checkAuthenticated, (req, res) => {
     res.sendFile(__dirname + '/addpet.html');
 });
+app.get('/report', checkAuthenticated, (req, res) => {
+    res.sendFile(__dirname + '/report.html');
+});
 
 app.get('/adoptpet/:petId', async (req, res) => {
     const petId = req.params.petId;
@@ -208,92 +208,131 @@ app.get('/managepets', async (req, res) => {
     }
 });
 
-//for to aopt pet
-app.post('/adoptpet/:petId', (req, res) => {
+//to adopt a pet
+app.post('/adoptpet/:petId', async (req, res) => {
     const petId = req.params.petId;
     const { customerName, email, phone } = req.body;
 
-    const newAdoption = new Adoption({
-        customerName,
-        email,
-        phone,
-        petId,
-        paymentStatus: 'Pending', // Razorpay status
-    });
+    try {
+        const newAdoption = new Adoption({
+            customerName,
+            email,
+            phone,
+            petId,
+            paymentStatus: 'Pending',
+        });
 
-    newAdoption.save((err, adoption) => {
-        if (err) {
-            return res.status(500).send('Error saving adoption details');
-        }
+        const adoption = await newAdoption.save(); // Save with async/await
 
-        // Redirect to payment (next step is integrating Razorpay)
-        res.redirect(`/payment/${adoption._id}`);
-    });
+        // Proceed with the Paytm payment process (you can update this part as per your Paytm implementation)
+        const paymentDetails = {
+            'MID': paytmConfig.MID,
+            'WEBSITE': paytmConfig.WEBSITE,
+            'INDUSTRY_TYPE_ID': paytmConfig.INDUSTRY_TYPE_ID,
+            'CHANNEL_ID': paytmConfig.CHANNEL_ID,
+            'ORDER_ID': adoption._id.toString(),
+            'CUST_ID': email,
+            'TXN_AMOUNT': '100.00',
+            'CALLBACK_URL': paytmConfig.CALLBACK_URL,
+            'EMAIL': email,
+            'MOBILE_NO': phone
+        };
+
+        PaytmChecksum.generateSignature(paymentDetails, paytmConfig.KEY).then(function(checksum) {
+            paymentDetails.CHECKSUMHASH = checksum;
+
+            const postParams = {
+                uri: 'https://securegw-stage.paytm.in/theia/processTransaction',
+                method: 'POST',
+                json: paymentDetails
+            };
+
+            request(postParams, function(error, response, body) {
+                if (error) {
+                    return res.status(500).json({ success: false, message: 'Error creating Paytm order' });
+                } else {
+                    const paymentUrl = `https://securegw-stage.paytm.in/order/process?ORDER_ID=${paymentDetails.ORDER_ID}`;
+                    res.json({ success: true, paymentUrl });
+                }
+            });
+        }).catch(function(error) {
+            console.log('Error generating checksum:', error);
+            res.status(500).json({ success: false, message: 'Error generating checksum' });
+        });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error saving adoption details' });
+    }
 });
 
-// Route to create an order
-app.post('/create-order', async (req, res) => {
-    const { amount } = req.body; // Amount in INR (in paisa)
-  
-    const options = {
-      amount: amount * 100, // Convert amount to paisa
-      currency: 'INR',
-      receipt: `receipt_order_${Date.now()}`,
-      payment_capture: 1, // Auto capture
-    };
-  
-    try {
-      const order = await razorpay.orders.create(options);
-      res.json({
-        id: order.id,
-        currency: order.currency,
-        amount: order.amount,
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send('Error creating Razorpay order');
-    }
-  });
 
-  app.post('/razorpay-webhook', express.json(), async (req, res) => {
-    const webhookSecret = 'YOUR_WEBHOOK_SECRET'; // Replace with your webhook secret
+app.post('/payment/callback', (req, res) => {
+    const body = req.body;
+    const checksum = body.CHECKSUMHASH;
 
-    // Verify the webhook signature
-    const shasum = crypto.createHmac('sha256', webhookSecret);
-    shasum.update(JSON.stringify(req.body));
-    const digest = shasum.digest('hex');
+    // Verify checksum
+    if (PaytmChecksum.verifySignature(body, paytmConfig.KEY, checksum)) {
+        const { ORDERID, TXNID, TXNAMOUNT, PAYMENTMODE, STATUS, RESPCODE, RESPMSG } = body;
 
-    if (digest !== req.headers['x-razorpay-signature']) {
-        return res.status(400).send('Webhook signature verification failed');
-    }
+        if (STATUS === 'TXN_SUCCESS') {
+            // Update adoption status when payment is successful
+            Adoption.findOneAndUpdate({ _id: ORDERID }, { paymentStatus: 'Success' }, { new: true }, (err, adoption) => {
+                if (err || !adoption) {
+                    return res.status(404).send('Adoption record not found or error updating payment status');
+                }
 
-    // Extract the payment details
-    const { event, payload } = req.body;
-    if (event === 'payment.captured') {
-        const paymentId = payload.payment.entity.id;
-        const adoptionId = payload.payment.entity.receipt;
-
-        try {
-            // Find the adoption by its ID and update the payment status
-            const adoption = await Adoption.findById(adoptionId);
-            if (!adoption) {
-                return res.status(404).send('Adoption record not found');
-            }
-
-            adoption.paymentStatus = 'Success';
-            await adoption.save();
-
-            // Send response back to Razorpay
-            res.status(200).send('Webhook received and processed successfully');
-        } catch (error) {
-            console.error('Error updating adoption record:', error);
-            res.status(500).send('Internal Server Error');
+                res.status(200).send('Payment successful and adoption process updated.');
+            });
+        } else {
+            res.status(400).send(`Payment failed: ${RESPMSG}`);
         }
     } else {
-        // Ignore other events
-        res.status(200).send('Event ignored');
+        res.status(400).send('Checksum verification failed');
     }
 });
+
+app.post('/create-order', (req, res) => {
+    const { amount } = req.body; // Amount in INR
+
+    const paymentDetails = {
+        'MID': paytmConfig.MID,
+        'WEBSITE': paytmConfig.WEBSITE,
+        'INDUSTRY_TYPE_ID': paytmConfig.INDUSTRY_TYPE_ID,
+        'CHANNEL_ID': paytmConfig.CHANNEL_ID,
+        'ORDER_ID': `ORDER_${new Date().getTime()}`,
+        'CUST_ID': 'CUSTOMER_ID_HERE', // Provide a unique customer ID
+        'TXN_AMOUNT': amount,
+        'CALLBACK_URL': paytmConfig.CALLBACK_URL,
+        'EMAIL': 'customer_email@example.com',
+        'MOBILE_NO': 'customer_phone_number'
+    };
+
+    PaytmChecksum.generateSignature(paymentDetails, paytmConfig.KEY).then(function(checksum) {
+        paymentDetails.CHECKSUMHASH = checksum;
+
+        const postParams = {
+            uri: 'https://securegw-stage.paytm.in/theia/processTransaction',
+            method: 'POST',
+            json: paymentDetails
+        };
+
+        request(postParams, function(error, response, body) {
+            if (error) {
+                return res.status(500).send('Error creating Paytm order');
+            } else {
+                res.json({
+                    id: paymentDetails.ORDER_ID,
+                    currency: 'INR',
+                    amount: amount * 100 // Amount in paisa
+                });
+            }
+        });
+    }).catch(function(error) {
+        console.log('Error generating checksum:', error);
+        res.status(500).send('Error generating checksum');
+    });
+});
+
 
 
 

@@ -114,9 +114,19 @@ app.get("/signup", (req, res) => {
     res.sendFile(__dirname + "/signup.html");
 });
 
-app.get("/dashboard", checkAuthenticated, (req, res) => {
-    res.sendFile(__dirname + "/dashboard.html"); // Protected route
+app.get("/dashboard", checkAuthenticated, async (req, res) => {
+    try {
+        const petOwnerId = req.user._id; // Assuming req.user contains the authenticated user
+        const adoptions = await Adoption.find({ petOwnerId }).populate('petId').exec(); // Populate pet details
+        
+        res.render("dashboard", { adoptions });
+    } catch (err) {
+        console.error("Error loading dashboard:", err);
+        res.status(500).send('Error loading dashboard');
+    }
 });
+
+
 
 app.get('/success', (req, res) => {
     res.sendFile(__dirname + '/success.html');
@@ -214,23 +224,30 @@ app.post('/adoptpet/:petId', async (req, res) => {
     const { customerName, email, phone } = req.body;
 
     try {
+        // Find the pet and its owner to link with the adoption
+        const pet = await Pet.findById(petId).populate('owner'); // Assuming pet has an owner field
+        if (!pet) {
+            return res.status(404).json({ success: false, message: 'Pet not found' });
+        }
+
         const newAdoption = new Adoption({
             customerName,
             email,
             phone,
             petId,
+            petOwnerId: pet.owner._id, // Store the owner of the pet
             paymentStatus: 'Pending',
         });
 
         const adoption = await newAdoption.save(); // Save with async/await
 
-        // Proceed with the Paytm payment process (you can update this part as per your Paytm implementation)
+        // Prepare Paytm payment details
         const paymentDetails = {
             'MID': paytmConfig.MID,
             'WEBSITE': paytmConfig.WEBSITE,
             'INDUSTRY_TYPE_ID': paytmConfig.INDUSTRY_TYPE_ID,
             'CHANNEL_ID': paytmConfig.CHANNEL_ID,
-            'ORDER_ID': adoption._id.toString(),
+            'ORDER_ID': adoption._id.toString(), // Use adoption ID as the order ID
             'CUST_ID': email,
             'TXN_AMOUNT': '100.00',
             'CALLBACK_URL': paytmConfig.CALLBACK_URL,
@@ -238,6 +255,7 @@ app.post('/adoptpet/:petId', async (req, res) => {
             'MOBILE_NO': phone
         };
 
+        // Generate Paytm checksum
         PaytmChecksum.generateSignature(paymentDetails, paytmConfig.KEY).then(function(checksum) {
             paymentDetails.CHECKSUMHASH = checksum;
 
@@ -247,6 +265,7 @@ app.post('/adoptpet/:petId', async (req, res) => {
                 json: paymentDetails
             };
 
+            // Request to Paytm for transaction
             request(postParams, function(error, response, body) {
                 if (error) {
                     return res.status(500).json({ success: false, message: 'Error creating Paytm order' });
@@ -266,30 +285,41 @@ app.post('/adoptpet/:petId', async (req, res) => {
 });
 
 
-app.post('/payment/callback', (req, res) => {
+
+app.post('/payment/callback', async (req, res) => {
     const body = req.body;
     const checksum = body.CHECKSUMHASH;
 
     // Verify checksum
     if (PaytmChecksum.verifySignature(body, paytmConfig.KEY, checksum)) {
-        const { ORDERID, TXNID, TXNAMOUNT, PAYMENTMODE, STATUS, RESPCODE, RESPMSG } = body;
+        const { ORDERID, TXNID, TXNAMOUNT, STATUS, RESPCODE, RESPMSG } = body;
 
-        if (STATUS === 'TXN_SUCCESS') {
-            // Update adoption status when payment is successful
-            Adoption.findOneAndUpdate({ _id: ORDERID }, { paymentStatus: 'Success' }, { new: true }, (err, adoption) => {
-                if (err || !adoption) {
-                    return res.status(404).send('Adoption record not found or error updating payment status');
-                }
+        // Find the adoption record using ORDERID (which is the _id of adoption)
+        try {
+            const adoption = await Adoption.findById(ORDERID);
+
+            if (!adoption) {
+                return res.status(404).send('Adoption record not found');
+            }
+
+            if (STATUS === 'TXN_SUCCESS') {
+                // Update the payment status to 'Success'
+                adoption.paymentStatus = 'Success';
+                await adoption.save(); // Save the updated adoption status
 
                 res.status(200).send('Payment successful and adoption process updated.');
-            });
-        } else {
-            res.status(400).send(`Payment failed: ${RESPMSG}`);
+            } else {
+                // Payment failed
+                res.status(400).send(`Payment failed: ${RESPMSG}`);
+            }
+        } catch (error) {
+            res.status(500).send('Error updating adoption record');
         }
     } else {
         res.status(400).send('Checksum verification failed');
     }
 });
+
 
 app.post('/create-order', (req, res) => {
     const { amount } = req.body; // Amount in INR

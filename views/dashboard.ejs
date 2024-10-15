@@ -69,7 +69,6 @@
                     </div>
                 </div>
             
-
                 <div class="expenses">
                     <div class="middle">
                         <div class="left">
@@ -78,8 +77,6 @@
                         </div>
                     </div>
                 </div>
-    
-
 
                 <div class="income">
                     <div class="middle">
@@ -91,52 +88,36 @@
                 </div>
             </div>
 
+            <!-- Adoption Requests Table -->
             <div class="recent-order">
                 <h1>Adoption Requests</h1>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Customer Name</th>
-                                <th>Customer Number</th>
-                                <th>Pet Name</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Customer Number</th>
+                            <th>Pet Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
 
-                        <tbody>
+                    <tbody>
+                        <% adoptions.forEach(function(adoption) { %>
                             <tr>
-                                <td>Robert Downey Jr.</td>
-                                <td>123456789</td>
-                                <td>Luffy</td>
-                                <td class="warning">Pending</td>
+                                <td><%= adoption.customerName %></td>
+                                <td><%= adoption.phone %></td>
+                                <td>
+                                    <%= adoption.petId ? adoption.petId.name : 'Pet Not Found' %> <!-- Access pet details directly -->
+                                </td>
+                                <td class="<%= adoption.paymentStatus === 'Pending' ? 'warning' : 'success' %>">
+                                    <%= adoption.paymentStatus %>
+                                </td>
                                 <td class="primary">Details</td>
                             </tr>
-
-                            <tr>
-                                <td>Gal Gadot</td>
-                                <td>123456789</td>
-                                <td>Popoye</td>
-                                <td class="warning">Pending</td>
-                                <td class="primary">Details</td>
-                            </tr>
-
-                            <tr>
-                                <td>Jason Mamoa</td>
-                                <td>123456789</td>
-                                <td>Momoa</td>
-                                <td class="warning">Pending</td>
-                                <td class="primary">Details</td>
-                            </tr>
-
-                            <tr>
-                                <td>Shah Rukh Khan</td>
-                                <td>123456789</td>
-                                <td>Milli</td>
-                                <td class="warning">Pending</td>
-                                <td class="primary">Details</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
 
         </main>

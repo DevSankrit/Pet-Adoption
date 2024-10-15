@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment for Adoption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 30px;
+        }
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #F37254;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #D55E47;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pay for Pet Adoption</h1>
+        <p>Thank you for choosing to adopt! Please proceed with the payment to complete your adoption process.</p>
+        
+        <!-- Display the amount to be paid (modify this as per your setup) -->
+        <p class="amount">₹500.00</p>
+        
+        <!-- Razorpay Payment Button -->
+        <form action="/razorpay-webhook" method="POST">
+            <input type="hidden" name="adoptionId" value="<%= adoptionId %>">
+            <button id="rzp-button1">Pay Now</button>
+        </form>
+    </div>
+
+    <!-- Razorpay Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document.getElementById('rzp-button1').onclick = function (e) {
+            e.preventDefault();  // Prevent form submission for Razorpay button click
+
+            var options = {
+                key: 'YOUR_TEST_KEY_ID', // Replace with your Razorpay API Key
+                amount: '50000', // Amount in paisa (₹500)
+                currency: 'INR',
+                name: 'Pet Adoption',
+                description: 'Adopt a lovely pet',
+                image: 'https://example.com/logo.png', // Optional logo
+                handler: function (response) {
+                    alert('Payment successful: ' + response.razorpay_payment_id);
+
+                    // Optionally send a post request to update the adoption status
+                    fetch('/razorpay-webhook', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            adoptionId: '<%= adoptionId %>',
+                            paymentId: response.razorpay_payment_id,
+                            signature: response.razorpay_signature
+                        }),
+                    });
+                },
+                prefill: {
+                    name: 'John Doe',
+                    email: 'john.doe@example.com',
+                    contact: '9999999999'
+                },
+                notes: {
+                    adoptionId: '<%= adoptionId %>'  // Send adoptionId for webhook processing
+                },
+                theme: {
+                    color: '#F37254'  // Customize the button color if needed
+                }
+            };
+
+            var rzp1 = new Razorpay(options);
+            rzp1.open();  // Trigger Razorpay modal
+        };
+    </script>
+</body>
+</html>

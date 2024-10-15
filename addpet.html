@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Webpage</title>
+    <link rel="stylesheet" href="dashboardcss.css">
+    <link rel="stylesheet" href="addpetcss.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+
+<body>
+    <div class="container">
+        <aside>
+            <div class="top">
+                <div class="logo">
+                    <h2>RESCUE <span class="primary">HEARTS</span>❤</h2>
+                </div>
+                <div class="close" id="close-btn">
+                    <span class="material-symbols-outlined"> close </span>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <a href="/dashboard">
+                    <span class="material-symbols-outlined"> grid_view </span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="" class="active">
+                    <span class="material-symbols-outlined"> person_outline </span>
+                    <h3>Add Pet</h3>
+                </a>
+
+                <a href="/managepets">
+                    <span class="material-symbols-outlined"> insights </span>
+                    <h3>Manage Pets</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-symbols-outlined"> mail_outline </span>
+                    <h3>Messages</h3>
+                    <span class="msg-count">14</span>
+                </a>
+
+                <a href="#">
+                    <span class="material-symbols-outlined"> receipt_long </span>
+                    <h3>Shelter Stats</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-symbols-outlined"> report_gmailerrorred </span>
+                    <h3>Reports</h3>
+                </a>
+                <a href="" id="logout-link">
+                    <span class="material-symbols-outlined"> logout </span>
+                    <h3>Logout</h3>
+                </a>
+            </div>
+        </aside>
+
+        <main>
+            <div style="text-align: center;">
+                <h1 class="main-title" style="font-size: 3rem;">Add New Pet for Adoption</h1>
+            </div>
+            <form action="/addpet" method="POST" enctype="multipart/form-data">
+                <!-- Basic Info -->
+                <label for="name">Pet Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="type">Type of Pet:</label>
+                <select id="type" name="type">
+                    <option value="" disabled selected>Select Type of Pet</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="rabbit">Rabbit</option>
+                    <option value="bird">Bird</option>
+                    <option value="horse">Horse</option>
+                    <option value="cow">Cow</option>
+                    <option value="others">Others</option>
+                </select>
+
+                <label for="breed">Breed:</label>
+                <input type="text" id="breed" name="breed">
+
+                <label for="age">Age (Years):</label>
+                <input type="text" id="age" name="age">
+
+                <!-- Gender Dropdown -->
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+
+                <!-- Vaccination Dropdown -->
+                <label for="vaccination">Vaccination Status:</label>
+                <select id="vaccination" name="vaccination" required>
+                    <option value="" disabled selected>Select Vaccination Status</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+
+                <!-- Neutered/Spayed Dropdown -->
+                <label for="neutered">Neutered/Spayed:</label>
+                <select id="neutered" name="neutered" required>
+                    <option value="" disabled selected>Select Neutered/Spayed Status</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+
+
+                <!-- Medical Conditions -->
+                <label for="medical_conditions">Medical Conditions:</label>
+                <textarea id="medical_conditions" name="medical_conditions" maxlength="100" class="styled-textarea"
+                    required></textarea>
+
+                <!-- Photo Upload -->
+                <label for="photo" class="custom-file-upload">
+                    <input type="file" id="photo" name="photo" required />
+                    Choose Photo
+                </label>
+
+
+                <button type="submit">Add Pet</button>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById("logout-link").addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent the default anchor click behavior
+            
+            // Create a form element to send a POST request
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/logout";
+    
+            // Append the form to the body and submit it
+            document.body.appendChild(form);
+            form.submit();
+        });
+    </script>
+</body>
+
+</html>

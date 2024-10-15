@@ -1,0 +1,161 @@
+/* Form Container Styles */
+form {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    margin: auto;
+}
+
+form label {
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+option{
+    font-family: 'Poppins', sans-serif;
+}
+select{
+    font-family: 'Poppins', sans-serif;
+}
+textarea{
+    font-family: 'Poppins', sans-serif;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="file"],
+form select{
+    font-size: 16px; /* Font size */
+
+    resize: none;
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s;
+}
+/* Styling the text input box */
+
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #66a6ff;
+    outline: none;
+}
+
+form textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+
+/* Submit Button */
+form button[type="submit"] {
+    background-color: #66a6ff;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    width: 100%;
+    font-weight: 600;
+}
+
+form button[type="submit"]:hover {
+    background-color: #4d82d3;
+}
+
+/* Form Section Headers */
+form h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+form input[type="file"] {
+    padding: 8px;
+    background-color: #f8f8f8;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form input[type="file"]:hover {
+    background-color: #f0f0f0;
+}
+
+/* Styles specific to the Medical Conditions textarea */
+.styled-textarea {
+    width: 100%; /* Set width to match other inputs */
+    height: calc(4 * 1.5em + 2px); /* Height for 4 lines of text */
+    padding: 12px 15px; /* Padding for inner space */
+    border: 2px solid #ccc; /* Border color */
+    border-radius: 8px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    line-height: 1.5; /* Line height for text */
+    vertical-align: top; /* Aligns the cursor to the top */
+    resize: none; /* Prevent resizing */
+    margin-bottom: 20px; /* Space below the textarea */
+}
+
+/* Scrollbar customization */
+.styled-textarea::-webkit-scrollbar {
+    width: 7px; /* Width of scrollbar */
+}
+
+.styled-textarea::-webkit-scrollbar-thumb {
+    background-color: black; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded scrollbar */
+}
+
+/* Focus effect */
+.styled-textarea:focus {
+    border-color: #4a90e2; /* Change border color on focus */
+}
+
+/* Adjust label style */
+
+
+
+/* Styling for the custom file input */
+.custom-file-upload {
+    display: inline-block;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 16px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.custom-file-upload input[type="file"] {
+    display: none; /* Hide the default file input */
+}
+
+.custom-file-upload:hover {
+    background-color: #e0f7fa; /* Light blue on hover */
+    border-color: #66a6ff; /* Change border color on hover */
+}
+
+.custom-file-upload:focus {
+    outline: none;
+    border-color: #66a6ff; /* Change border color when focused */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+

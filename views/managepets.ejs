@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Webpage</title>
+  <link rel="stylesheet" href="dashboardcss.css">
+  <link rel="stylesheet" href="managepets.css">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+
+<body>
+  <div class="container">
+    <aside>
+      <div class="top">
+        <div class="logo">
+          <h2>RESCUE <span class="primary">HEARTS</span>❤</h2>
+        </div>
+        <div class="close" id="close-btn">
+          <span class="material-symbols-outlined"> close </span>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <a href="/dashboard">
+          <span class="material-symbols-outlined"> grid_view </span>
+          <h3>Dashboard</h3>
+        </a>
+
+        <a href="/addpet">
+          <span class="material-symbols-outlined"> person_outline </span>
+          <h3>Add Pet</h3>
+        </a>
+
+        <a href="/managepets" class="active">
+          <span class="material-symbols-outlined"> insights </span>
+          <h3>Manage Pets</h3>
+        </a>
+
+        <a href="#">
+          <span class="material-symbols-outlined"> mail_outline </span>
+          <h3>Messages</h3>
+          <span class="msg-count">14</span>
+        </a>
+
+        <a href="#">
+          <span class="material-symbols-outlined"> receipt_long </span>
+          <h3>Shelter Stats</h3>
+        </a>
+
+        <a href="#">
+          <span class="material-symbols-outlined"> report_gmailerrorred </span>
+          <h3>Reports</h3>
+        </a>
+        <a href="" id="logout-link">
+          <span class="material-symbols-outlined"> logout </span>
+          <h3>Logout</h3>
+      </a>
+      </div>
+    </aside>
+
+    <main>
+      <div style="text-align: center;">
+        <h1 class="main-title" style="font-size: 3rem;">Manage Pets</h1>
+        <div class="app">
+
+          <main class="task-list">
+            <table id="task-table">
+              <thead>
+                <tr>
+                  <th>Pet Name</th>
+                  <th>Pet Type</th>
+                  <th>Breed</th>
+                  <th>Age</th>
+                  <th>Gender</th>
+                  <th>Vaccination Status</th>
+                  <th>Neutered</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- EJS Loop to render pets dynamically -->
+                <% pets.forEach(pet=> { %>
+                  <tr>
+                    <td>
+                      <%= pet.name %>
+                    </td>
+                    <td>
+                      <%= pet.type %>
+                    </td>
+                    <td>
+                      <%= pet.breed %>
+                    </td>
+                    <td>
+                      <%= pet.age %>
+                    </td>
+                    <td>
+                      <%= pet.gender %>
+                    </td>
+                    <td>
+                      <%= pet.vaccination ? 'Yes' : 'No' %>
+                    </td>
+                    <td>
+                      <%= pet.neutered ? 'Yes' : 'No' %>
+                    </td>
+                  </tr>
+                  <% }); %>
+              </tbody>
+            </table>
+          </main>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Popup for Managing Pet -->
+  <div id="editPetPopup" class="popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeEditPopup()">×</span>
+      <h2>Edit Pet Details</h2>
+      <form id="editPetForm">
+        <label for="petName">Pet Name:</label>
+        <input type="text" id="petName" name="name" required><br><br>
+
+        <label for="petType">Pet Type:</label>
+        <input type="text" id="petType" name="type" required><br><br>
+
+        <label for="petBreed">Breed:</label>
+        <input type="text" id="petBreed" name="breed" required><br><br>
+
+        <label for="petAge">Age:</label>
+        <input type="number" id="petAge" name="age" required><br><br>
+
+        <label for="petGender">Gender:</label>
+        <input type="text" id="petGender" name="gender" required><br><br>
+
+        <label for="petVaccination">Vaccination Status:</label>
+        <select id="petVaccination" name="vaccination" required>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select><br><br>
+
+        <label for="petNeutered">Neutered:</label>
+        <select id="petNeutered" name="neutered" required>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select><br><br>
+
+        <button type="submit">Update Pet</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("logout-link").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default anchor click behavior
+        
+        // Create a form element to send a POST request
+        var form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/logout";
+
+        // Append the form to the body and submit it
+        document.body.appendChild(form);
+        form.submit();
+    });
+</script>
+</body>
+
+</html>

@@ -18,6 +18,7 @@ const Adoption = require('./Model/adoption'); // Adjust the path based on your f
 
 
 
+
 // Import the pet controller
 const addPetController = require('./servers/addPetController');
 
@@ -32,6 +33,7 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse form dat
 app.use(express.json()); // Middleware to parse JSON
 app.use(flash()); // Initialize flash messages
 app.use(petRoutes);
+app.use('/uploads', express.static('uploads'));
 
 // MongoDB connection
 const MONGODB_URI = "mongodb://127.0.0.1:27017/petAdoption";

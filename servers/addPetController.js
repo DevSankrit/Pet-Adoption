@@ -56,5 +56,26 @@ const getPets = async (req, res) => {
     }
 };
 
+//delete pet
+
+const deletePet = async (req, res) => {
+    try {
+        const petId = req.params.petId;
+
+        // Find the pet by ID and ensure it belongs to the logged-in user
+        const pet = await Pet.findOneAndDelete({ _id: petId, owner: req.user._id });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Pet not found or you are not authorized to delete this pet' });
+        }
+
+        // Redirect back to the manage pets page after deletion
+        res.redirect('/managepets');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 // Export both addPet and getPets together
-module.exports = { addPet, getPets };
+module.exports = { addPet, getPets, deletePet };

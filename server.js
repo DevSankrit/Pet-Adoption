@@ -15,7 +15,8 @@ const paytmConfig = require('./config/paytmconfig');
 const PaytmChecksum = require('paytmchecksum');
 const request = require('request');
 const Adoption = require('./Model/adoption'); // Adjust the path based on your file structure
-
+const router = express.Router();
+const { deletePet } = require('./servers/addPetController');
 
 
 
@@ -163,6 +164,28 @@ app.get('/adoptpet/:petId', async (req, res) => {
     }
 });
 
+//deleteing the pet
+app.delete('/deletepet/:petId', async (req, res) => {
+    try {
+      const petId = req.params.petId;
+      
+      // Use await to delete the pet and handle the promise
+      const deletedPet = await Pet.findByIdAndDelete(petId);
+  
+      if (!deletedPet) {
+        return res.status(404).send('Pet not found'); // If the pet was not found in the database
+      }
+  
+      res.status(200).send('Pet deleted successfully');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error deleting the pet');
+    }
+  });
+  
+
+module.exports = router;
+
 
 
 // Signup route
@@ -208,11 +231,11 @@ app.post('/logout', (req, res) => {
 // Pet Add Route with File Handling using controller
 app.post('/addpet', checkAuthenticated, multer.single('photo'), addPetController.addPet);
 
-app.get('/managepets', async (req, res) => {
+//manage pets
+app.get('/managepets', checkAuthenticated, async (req, res) => {
     try {
-        // Fetch pets for the logged-in user
-        const pets = await Pet.find({ owner: req.user._id });  // Assuming logged-in user has _id in the session
-        // Render the managePets.ejs file and pass the pets data to it
+        // Fetch pets for the authenticated user
+        const pets = await Pet.find({ owner: req.user._id });
         res.render('managepets', { pets });
     } catch (err) {
         console.error(err);

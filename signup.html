@@ -12,12 +12,14 @@
 </head>
 <body>
 <!-- partial:index.partial.html -->
-<div class="box-form">
+<div style="height:95%" class="box-form">
     <div class="left">
     </div>
 
     <div class="right">
         <h5>Signup</h5>
+        <p>Already have an Account? <a href="/login">Login</a> into your account and start your pet adoption
+            journey in minutes.</p>
         <form id="signup-form" method="POST" action="/signup" onsubmit="return validatePasswords()">
             <div class="inputs">
                 <input type="text" name="name" placeholder="Name" required>

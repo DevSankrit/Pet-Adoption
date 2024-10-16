@@ -50,11 +50,11 @@ app.use(session({
     secret: 'secret', // Replace with environment variable
     resave: false,
     saveUninitialized: false,
-   /* cookie: { 
+    cookie: { 
         httpOnly: true, 
         secure: false, // Set to true if using https
         maxAge: 60 * 60 * 1000 // 1 hour expiry time for the cookie
-    }, */
+    },
 }));
 
 // Passport.js configuration

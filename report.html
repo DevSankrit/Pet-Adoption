@@ -169,5 +169,19 @@
         </form>
     </div>
     </div>
+    <script>
+        document.getElementById("logout-link").addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent the default anchor click behavior
+            
+            // Create a form element to send a POST request
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/logout";
+    
+            // Append the form to the body and submit it
+            document.body.appendChild(form);
+            form.submit();
+        });
+    </script>
 </body>
 </html>

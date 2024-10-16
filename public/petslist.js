@@ -1,84 +1,48 @@
-// // Get all the cards
-// const cards = document.querySelectorAll('.card');
-
-// // Get the message element
-// const message = document.getElementById('message');
-
-// // Add an event listener to the search form
-// document.querySelector('form[role="search"]').addEventListener('submit', function (event) {
-//     event.preventDefault(); // Prevent the form from submitting
-
-//     // Get the value of the input field
-//     const pincode = document.querySelector('#pincode-search').value;
-
-//         // If search input is empty, display all cards
-//         if (pincode === '') {
-//           cards.forEach(function (card) {
-//               card.style.display = 'block';
-//           });
-//           message.style.display = 'none';
-//           return; // exit function early
-//       }
-
-//     // Set a flag to check if any card is found for the given pincode
-//     let isCardFound = false;
-
-//     // Filter the cards based on the pincode
-//     cards.forEach(function (card) {
-//         if (card.dataset.pincode === pincode) {
-//             card.style.display = 'block';
-//             isCardFound = true;
-//         } else {
-//             card.style.display = 'none';
-//         }
-//     });
-
-//     // Show the message if no card is found for the given pincode
-//     if (!isCardFound) {
-//         message.style.display = 'block';
-//     } else {
-//         message.style.display = 'none';
-//     }
-// });
-
-// // code to make the elements take up the left out space
-// // get the rows
-// const row1 = document.querySelector('#second-section .venue-row:nth-of-type(1)');
-// const row2 = document.querySelector('#second-section .venue-row:nth-of-type(2)');
-
-// // get the cards in row 2
-// const cards1 = row2.querySelectorAll('.card');
-
-// // loop through the cards and move them to row 1 if there is space
-// cards1.forEach(card => {
-//   if (row1.offsetHeight >= row2.offsetHeight) {
-//     // move the card to row 1
-//     row1.appendChild(card);
-//   }
-// });
-
-// //search bar code
-// const searchInput = document.getElementById('pincode-search');
-// searchInput.addEventListener('input', function() {
-//   if (searchInput.value.length > 6) {
-//     searchInput.value = searchInput.value.slice(0, 6);
-//   }
-// });
-// JavaScript to fetch pet data from the server and dynamically display it
-// JavaScript to fetch pet data from the server and dynamically display it
-
 document.addEventListener('DOMContentLoaded', function () {
-    // Fetching the pet data from your API
+    // Initial fetch to get all pets
     fetch('/api/pets')  // Replace with your actual API endpoint
         .then(response => response.json())
         .then(pets => {
-            displayPets(pets);  // Call function to display pets
+            displayPets(pets);  // Call function to display pets initially
         })
         .catch(error => console.error('Error fetching pet data:', error));
+
+    // Adding search functionality for pet types
+    document.getElementById('search-button').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent form submission
+
+        // Get the value of the input field (search by pet type)
+        const searchValue = document.getElementById('pincode-search').value.toLowerCase();
+
+        // Fetch all pets and filter them based on the search value
+        fetch('/api/pets')  // Replace with your actual API endpoint
+            .then(response => response.json())
+            .then(pets => {
+                // Filter the pets array by the type (e.g., dog, cat)
+                const filteredPets = pets.filter(pet => pet.type.toLowerCase() === searchValue);
+
+                // Display filtered pets or show "No pets found" if none match
+                displayPets(filteredPets);
+            })
+            .catch(error => console.error('Error fetching pet data:', error));
+    });
 });
 
 function displayPets(pets) {
     const petSection = document.getElementById('second-section');
+    petSection.innerHTML = '';  // Clear the section before displaying new pets
+
+    if (pets.length === 0) {
+        // Show "No pets found" message if no pets match the search criteria
+        const noPetsMessage = `
+            <div class="col-12">
+                <h3>No pets found for this search.</h3>
+            </div>
+        `;
+        petSection.innerHTML = noPetsMessage;
+        return;
+    }
+
     let rowDiv = document.createElement('div');
     rowDiv.className = 'row'; // Bootstrap row to organize cards
 
@@ -144,6 +108,3 @@ function displayPets(pets) {
         }
     });
 }
-
-
-

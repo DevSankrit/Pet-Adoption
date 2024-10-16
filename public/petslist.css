@@ -51,7 +51,7 @@ input, #search-button {
     color: var(--color-dark);
     font-size: 1.5rem;
 }
-input[type="number"] {
+input[type="text"] {
     outline: 0;
     width: 100%;
     background: var(--color-light);
@@ -63,8 +63,8 @@ input[type="number"] {
     z-index: 1;
     position: relative;
 }
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
+input[type=text]::-webkit-inner-spin-button, 
+input[type=text]::-webkit-outer-spin-button { 
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;

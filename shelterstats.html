@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shelter Stats</title>
+    <link rel="stylesheet" href="dashboardcss.css">
+    <link rel="stylesheet" href="shelterstats.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        .container-second {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            color: #7380ec;
+        }
+        .stat-card {
+            margin-bottom: 20px;
+        }
+        .data {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: #333;
+        }
+        .stat-card button {
+            margin: 5px;
+            padding: 10px;
+            border: none;
+            background-color: #7380ec;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .stat-card button:hover {
+            background-color: #5160eb;
+        }
+        main {
+            width: 1120px;
+            margin: auto;
+        }
+        @media(max-width: 768px) {
+            .container-second {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside>
+            <div class="top">
+                <div class="logo">
+                    <h2>RESCUE <span class="primary">HEARTS</span>❤</h2>
+                </div>
+                <div class="close" id="close-btn">
+                    <span class="material-symbols-outlined"> close </span>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <a href="/dashboard">
+                    <span class="material-symbols-outlined"> grid_view </span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="/addpet">
+                    <span class="material-symbols-outlined"> person_outline </span>
+                    <h3>Add Pet</h3>
+                </a>
+
+                <a href="/managepets">
+                    <span class="material-symbols-outlined"> insights </span>
+                    <h3>Manage Pets</h3>
+                </a>
+
+                <a href="#" class="active">
+                    <span class="material-symbols-outlined"> receipt_long </span>
+                    <h3>Shelter Stats</h3>
+                </a>
+
+                <a href="/report">
+                    <span class="material-symbols-outlined"> report_gmailerrorred </span>
+                    <h3>Reports</h3>
+                </a>
+
+                <a href="" id="logout-link">
+                    <span class="material-symbols-outlined"> logout </span>
+                    <h3>Logout</h3>
+                </a>
+            </div>
+        </aside>
+
+        <div class="container-second">
+            <h1 class="main-title" style="font-size: 3rem;">Shelter Stats</h1>
+            <div class="app">
+                <main>
+                    <section class="stats">
+                        <div class="stat-card">
+                            <h2>Total Available Space</h2>
+                            <p class="data" id="availableSpace">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <h2>Pets Available for Adoption</h2>
+                            <p class="data" id="petsAvailable">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <h2>Adoption Requests Pending</h2>
+                            <p class="data" id="requestsPending">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <h2>Total Shelter Capacity</h2>
+                            <p class="data" id="totalCapacity">Loading...</p>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+
+        <script>
+document.addEventListener('DOMContentLoaded', function () {
+    async function fetchShelterStats() {
+        try {
+            const response = await fetch('/api/shelter/stats');
+            const data = await response.json();
+
+            console.log(data);  // Debugging output to check the data
+
+            if (response.ok) {
+                const petsAvailable = data.petsAvailable;
+                const totalCapacity = data.totalCapacity;
+                const requestsPending = data.requestsPending;
+
+                const availableSpace = totalCapacity - petsAvailable;
+
+                document.getElementById('availableSpace').textContent = availableSpace;
+                document.getElementById('petsAvailable').textContent = petsAvailable;
+                document.getElementById('requestsPending').textContent = requestsPending;
+                document.getElementById('totalCapacity').textContent = totalCapacity;
+            } else {
+                throw new Error('Failed to fetch shelter stats');
+            }
+        } catch (error) {
+            console.error('Error fetching shelter stats:', error);
+            alert('Error fetching shelter stats');
+        }
+    }
+
+    fetchShelterStats();
+});
+        </script>
+    </div>
+</body>
+</html>

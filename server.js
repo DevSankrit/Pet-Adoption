@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv'); // Optional if you're using env variables
 const User = require('./Model/model'); // Import the User model
 const bcrypt = require('bcryptjs'); // For password hashing
 const passport = require('passport'); // For user authentication
@@ -387,7 +386,6 @@ app.post('/create-order', (req, res) => {
         res.status(500).send('Error generating checksum');
     });
 });
-
 
 
 

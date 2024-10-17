@@ -130,6 +130,24 @@ app.get("/dashboard", checkAuthenticated, async (req, res) => {
 
 
 
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/Static Frontend/index.html');
+});
+app.get('/about', (req, res) => {
+    res.sendFile(__dirname + '/Static Frontend/about.html');
+});
+app.get('/blog', (req, res) => {
+    res.sendFile(__dirname + '/Static Frontend/blog.html');
+});
+app.get('/booking', (req, res) => {
+    res.sendFile(__dirname + '/Static Frontend/booking.html');
+});
+app.get('/contact', (req, res) => {
+    res.sendFile(__dirname + '/Static Frontend/contact.html');
+});
+app.get('/service', (req, res) => {
+    res.sendFile(__dirname + '/Static Frontend/service.html');
+});
 app.get('/success', (req, res) => {
     res.sendFile(__dirname + '/success.html');
 });

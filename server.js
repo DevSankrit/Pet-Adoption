@@ -10,9 +10,7 @@ const multer = require('./config/multer'); // Import multer config
 const Pet = require('./Model/petmodel');  // Adjust the path as necessary
 const petRoutes = require('./routes/petRoutes'); // Import pet routes
 const crypto = require('crypto');
-const paytmConfig = require('./config/paytmconfig');
-const PaytmChecksum = require('paytmchecksum');
-const request = require('request');
+const paypal = require('./config/paypal'); // PayPal configuration file
 const Adoption = require('./Model/adoption'); // Adjust the path based on your file structure
 const router = express.Router();
 const { deletePet } = require('./servers/addPetController');
@@ -260,149 +258,130 @@ app.get('/managepets', checkAuthenticated, async (req, res) => {
     }
 });
 
-//to adopt a pet
+// Adopt a pet with PayPal payment integration
 app.post('/adoptpet/:petId', async (req, res) => {
     const petId = req.params.petId;
     const { customerName, email, phone } = req.body;
 
     try {
-        // Find the pet and its owner to link with the adoption
-        const pet = await Pet.findById(petId).populate('owner'); // Assuming pet has an owner field
+        // Find the pet details to retrieve the pet owner's ID
+        const pet = await Pet.findById(petId);
         if (!pet) {
-            return res.status(404).json({ success: false, message: 'Pet not found' });
+            return res.status(404).send('Pet not found');
         }
 
+        const petOwnerId = pet.owner;
+        if (!petOwnerId) {
+            return res.status(400).send('Pet owner not found');
+        }
+
+        console.log("Creating new adoption for petId:", petId);
+        
+        // Save adoption details to the database, including the petOwnerId
         const newAdoption = new Adoption({
             customerName,
             email,
             phone,
             petId,
-            petOwnerId: pet.owner._id, // Store the owner of the pet
+            petOwnerId, // Add the pet owner ID here
             paymentStatus: 'Pending',
         });
 
-        const adoption = await newAdoption.save(); // Save with async/await
+        const adoption = await newAdoption.save();
+        console.log("Adoption saved:", adoption);
 
-        // Prepare Paytm payment details
-        const paymentDetails = {
-            'MID': paytmConfig.MID,
-            'WEBSITE': paytmConfig.WEBSITE,
-            'INDUSTRY_TYPE_ID': paytmConfig.INDUSTRY_TYPE_ID,
-            'CHANNEL_ID': paytmConfig.CHANNEL_ID,
-            'ORDER_ID': adoption._id.toString(), // Use adoption ID as the order ID
-            'CUST_ID': email,
-            'TXN_AMOUNT': '100.00',
-            'CALLBACK_URL': paytmConfig.CALLBACK_URL,
-            'EMAIL': email,
-            'MOBILE_NO': phone
-        };
-
-        // Generate Paytm checksum
-        PaytmChecksum.generateSignature(paymentDetails, paytmConfig.KEY).then(function(checksum) {
-            paymentDetails.CHECKSUMHASH = checksum;
-
-            const postParams = {
-                uri: 'https://securegw-stage.paytm.in/theia/processTransaction',
-                method: 'POST',
-                json: paymentDetails
-            };
-
-            // Request to Paytm for transaction
-            request(postParams, function(error, response, body) {
-                if (error) {
-                    return res.status(500).json({ success: false, message: 'Error creating Paytm order' });
-                } else {
-                    const paymentUrl = `https://securegw-stage.paytm.in/order/process?ORDER_ID=${paymentDetails.ORDER_ID}`;
-                    res.json({ success: true, paymentUrl });
+        // Create PayPal order using paypal.orders.OrdersCreateRequest
+        const request = new paypal.orders.OrdersCreateRequest();
+        request.prefer("return=representation");
+        request.requestBody({
+            intent: 'CAPTURE',
+            purchase_units: [{
+                reference_id: adoption._id.toString(),
+                amount: {
+                    currency_code: 'USD',
+                    value: '100.00' // Amount you want to charge (change to your currency and amount)
                 }
-            });
-        }).catch(function(error) {
-            console.log('Error generating checksum:', error);
-            res.status(500).json({ success: false, message: 'Error generating checksum' });
+            }],
+            application_context: {
+                return_url: `http://localhost:5000/payment/success/${adoption._id}`, // PayPal will redirect here after payment
+                cancel_url: `http://localhost:5000/payment/cancel/${adoption._id}` // Redirect here if payment is canceled
+            }
         });
 
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'Error saving adoption details' });
-    }
-});
+        const order = await paypal.client.execute(request);  // Use client.execute to send the request
+        console.log("Order created:", order);
 
-
-
-app.post('/payment/callback', async (req, res) => {
-    const body = req.body;
-    const checksum = body.CHECKSUMHASH;
-
-    // Verify checksum
-    if (PaytmChecksum.verifySignature(body, paytmConfig.KEY, checksum)) {
-        const { ORDERID, TXNID, TXNAMOUNT, STATUS, RESPCODE, RESPMSG } = body;
-
-        // Find the adoption record using ORDERID (which is the _id of adoption)
-        try {
-            const adoption = await Adoption.findById(ORDERID);
-
-            if (!adoption) {
-                return res.status(404).send('Adoption record not found');
-            }
-
-            if (STATUS === 'TXN_SUCCESS') {
-                // Update the payment status to 'Success'
-                adoption.paymentStatus = 'Success';
-                await adoption.save(); // Save the updated adoption status
-
-                res.status(200).send('Payment successful and adoption process updated.');
-            } else {
-                // Payment failed
-                res.status(400).send(`Payment failed: ${RESPMSG}`);
-            }
-        } catch (error) {
-            res.status(500).send('Error updating adoption record');
+        if (!order.result.links || order.result.links.length === 0) {
+            throw new Error("No approval link found in PayPal response.");
         }
-    } else {
-        res.status(400).send('Checksum verification failed');
+
+        const approvalUrl = order.result.links.find(link => link.rel === 'approve').href;
+        console.log("PayPal approval URL:", approvalUrl);
+
+        // Send PayPal approval URL to the client
+        res.json({ success: true, approvalUrl });
+    } catch (error) {
+        console.error('Error processing payment: ', error);
+        res.status(500).json({ success: false, message: 'Error saving adoption details' });
     }
 });
 
+// Payment success route
+app.get('/payment/success/:adoptionId', async (req, res) => {
+    const { token } = req.query; // PayPal provides token in the query parameters
+    const { adoptionId } = req.params; // Adoption ID from URL
 
-app.post('/create-order', (req, res) => {
-    const { amount } = req.body; // Amount in INR
+    try {
+        console.log("Capturing payment for token:", token);
 
-    const paymentDetails = {
-        'MID': paytmConfig.MID,
-        'WEBSITE': paytmConfig.WEBSITE,
-        'INDUSTRY_TYPE_ID': paytmConfig.INDUSTRY_TYPE_ID,
-        'CHANNEL_ID': paytmConfig.CHANNEL_ID,
-        'ORDER_ID': `ORDER_${new Date().getTime()}`,
-        'CUST_ID': 'CUSTOMER_ID_HERE', // Provide a unique customer ID
-        'TXN_AMOUNT': amount,
-        'CALLBACK_URL': paytmConfig.CALLBACK_URL,
-        'EMAIL': 'customer_email@example.com',
-        'MOBILE_NO': 'customer_phone_number'
-    };
+        // Capture the payment
+        const request = new paypal.orders.OrdersCaptureRequest(token);
+        request.requestBody({});
+        const capture = await paypal.client.execute(request);
+        console.log("Payment captured:", capture);
 
-    PaytmChecksum.generateSignature(paymentDetails, paytmConfig.KEY).then(function(checksum) {
-        paymentDetails.CHECKSUMHASH = checksum;
+        // Check if the payment is successful
+        if (capture.result.status === 'COMPLETED') {
+            console.log("Payment completed successfully.");
 
-        const postParams = {
-            uri: 'https://securegw-stage.paytm.in/theia/processTransaction',
-            method: 'POST',
-            json: paymentDetails
-        };
+            // Update adoption payment status in the database to 'Success'
+            await Adoption.findByIdAndUpdate(adoptionId, {
+                paymentStatus: 'Success',
+                paymentDetails: capture.result // Save relevant payment details
+            });
+            console.log("Adoption status updated to Success for:", adoptionId);
+        } else {
+            console.error("Payment not completed, status:", capture.result.status);
+            return res.status(400).send('Payment failed.');
+        }
 
-        request(postParams, function(error, response, body) {
-            if (error) {
-                return res.status(500).send('Error creating Paytm order');
-            } else {
-                res.json({
-                    id: paymentDetails.ORDER_ID,
-                    currency: 'INR',
-                    amount: amount * 100 // Amount in paisa
-                });
-            }
-        });
-    }).catch(function(error) {
-        console.log('Error generating checksum:', error);
-        res.status(500).send('Error generating checksum');
-    });
+        // Respond to client
+        res.status(200).send('Payment successful! Adoption process completed.');
+    } catch (error) {
+        console.error('Error capturing payment: ', error);
+        res.status(500).send('Error capturing payment.');
+    }
+});
+
+// Payment cancel route
+app.get('/payment/cancel/:adoptionId', async (req, res) => {
+    const { adoptionId } = req.params;
+
+    try {
+        console.log("Canceling payment for adoptionId:", adoptionId);
+
+        // Optionally update the payment status to canceled
+        const adoption = await Adoption.findById(adoptionId);
+        if (!adoption) {
+            return res.status(404).send('Adoption not found');
+        }
+
+        await Adoption.findByIdAndUpdate(adoptionId, { paymentStatus: 'Canceled' });
+        res.status(200).send('Payment canceled. You can try again.');
+    } catch (error) {
+        console.error('Error canceling payment:', error);
+        res.status(500).send('Error canceling payment.');
+    }
 });
 
 

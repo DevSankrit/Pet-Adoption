@@ -10,7 +10,7 @@ const multer = require('./config/multer'); // Import multer config
 const Pet = require('./Model/petmodel');  // Adjust the path as necessary
 const petRoutes = require('./routes/petRoutes'); // Import pet routes
 const crypto = require('crypto');
-const paypal = require('./config/paypal'); // PayPal configuration file
+const { client, paypal } = require('./config/paypal'); // Adjust the path as necessary
 const Adoption = require('./Model/adoption'); // Adjust the path based on your file structure
 const router = express.Router();
 const { deletePet } = require('./servers/addPetController');
@@ -258,132 +258,40 @@ app.get('/managepets', checkAuthenticated, async (req, res) => {
     }
 });
 
-// Adopt a pet with PayPal payment integration
 app.post('/adoptpet/:petId', async (req, res) => {
     const petId = req.params.petId;
-    const { customerName, email, phone } = req.body;
+    const { customerName, email, phone, paymentStatus, paymentDetails } = req.body;
+
+    // Validate incoming data
+    if (!customerName || !email || !phone || !paymentStatus) {
+        return res.status(400).json({ message: 'Invalid input data' });
+    }
+
+    // Check if the pet exists and retrieve its owner ID
+    const pet = await Pet.findById(petId).populate('owner'); // Ensure you have a reference to the pet owner
+    if (!pet) {
+        return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    const newAdoption = new Adoption({
+        customerName,
+        email,
+        phone,
+        petId,
+        petOwnerId: pet.owner._id, // Include the pet owner's ID
+        paymentStatus, // This should reflect the payment status (e.g., 'Completed' or 'Pending')
+        paymentDetails: paymentDetails || {}, // Use provided payment details or an empty object
+    });
 
     try {
-        // Find the pet details to retrieve the pet owner's ID
-        const pet = await Pet.findById(petId);
-        if (!pet) {
-            return res.status(404).send('Pet not found');
-        }
-
-        const petOwnerId = pet.owner;
-        if (!petOwnerId) {
-            return res.status(400).send('Pet owner not found');
-        }
-
-        console.log("Creating new adoption for petId:", petId);
-        
-        // Save adoption details to the database, including the petOwnerId
-        const newAdoption = new Adoption({
-            customerName,
-            email,
-            phone,
-            petId,
-            petOwnerId, // Add the pet owner ID here
-            paymentStatus: 'Pending',
-        });
-
         const adoption = await newAdoption.save();
-        console.log("Adoption saved:", adoption);
-
-        // Create PayPal order using paypal.orders.OrdersCreateRequest
-        const request = new paypal.orders.OrdersCreateRequest();
-        request.prefer("return=representation");
-        request.requestBody({
-            intent: 'CAPTURE',
-            purchase_units: [{
-                reference_id: adoption._id.toString(),
-                amount: {
-                    currency_code: 'USD',
-                    value: '100.00' // Amount you want to charge (change to your currency and amount)
-                }
-            }],
-            application_context: {
-                return_url: `http://localhost:5000/payment/success/${adoption._id}`, // PayPal will redirect here after payment
-                cancel_url: `http://localhost:5000/payment/cancel/${adoption._id}` // Redirect here if payment is canceled
-            }
-        });
-
-        const order = await paypal.client.execute(request);  // Use client.execute to send the request
-        console.log("Order created:", order);
-
-        if (!order.result.links || order.result.links.length === 0) {
-            throw new Error("No approval link found in PayPal response.");
-        }
-
-        const approvalUrl = order.result.links.find(link => link.rel === 'approve').href;
-        console.log("PayPal approval URL:", approvalUrl);
-
-        // Send PayPal approval URL to the client
-        res.json({ success: true, approvalUrl });
-    } catch (error) {
-        console.error('Error processing payment: ', error);
-        res.status(500).json({ success: false, message: 'Error saving adoption details' });
+        console.log('Adoption saved successfully:', adoption); // Log adoption details
+        res.status(200).json({ message: 'Adoption details saved successfully', adoption });
+    } catch (err) {
+        console.error('Error saving adoption details:', err);
+        res.status(500).json({ message: 'Error saving adoption details', error: err.message });
     }
 });
-
-// Payment success route
-app.get('/payment/success/:adoptionId', async (req, res) => {
-    const { token } = req.query; // PayPal provides token in the query parameters
-    const { adoptionId } = req.params; // Adoption ID from URL
-
-    try {
-        console.log("Capturing payment for token:", token);
-
-        // Capture the payment
-        const request = new paypal.orders.OrdersCaptureRequest(token);
-        request.requestBody({});
-        const capture = await paypal.client.execute(request);
-        console.log("Payment captured:", capture);
-
-        // Check if the payment is successful
-        if (capture.result.status === 'COMPLETED') {
-            console.log("Payment completed successfully.");
-
-            // Update adoption payment status in the database to 'Success'
-            await Adoption.findByIdAndUpdate(adoptionId, {
-                paymentStatus: 'Success',
-                paymentDetails: capture.result // Save relevant payment details
-            });
-            console.log("Adoption status updated to Success for:", adoptionId);
-        } else {
-            console.error("Payment not completed, status:", capture.result.status);
-            return res.status(400).send('Payment failed.');
-        }
-
-        // Respond to client
-        res.status(200).send('Payment successful! Adoption process completed.');
-    } catch (error) {
-        console.error('Error capturing payment: ', error);
-        res.status(500).send('Error capturing payment.');
-    }
-});
-
-// Payment cancel route
-app.get('/payment/cancel/:adoptionId', async (req, res) => {
-    const { adoptionId } = req.params;
-
-    try {
-        console.log("Canceling payment for adoptionId:", adoptionId);
-
-        // Optionally update the payment status to canceled
-        const adoption = await Adoption.findById(adoptionId);
-        if (!adoption) {
-            return res.status(404).send('Adoption not found');
-        }
-
-        await Adoption.findByIdAndUpdate(adoptionId, { paymentStatus: 'Canceled' });
-        res.status(200).send('Payment canceled. You can try again.');
-    } catch (error) {
-        console.error('Error canceling payment:', error);
-        res.status(500).send('Error canceling payment.');
-    }
-});
-
 
 
 // Start the server

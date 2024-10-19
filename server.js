@@ -14,7 +14,10 @@ const { client, paypal } = require('./config/paypal'); // Adjust the path as nec
 const Adoption = require('./Model/adoption'); // Adjust the path based on your file structure
 const router = express.Router();
 const { deletePet } = require('./servers/addPetController');
-
+const { exec } = require('child_process');
+const bodyParser = require('body-parser');
+const sgMail = require('@sendgrid/mail');
+require('dotenv').config({ path: './secret.env' });
 
 
 // Import the pet controller
@@ -32,6 +35,9 @@ app.use(express.json()); // Middleware to parse JSON
 app.use(flash()); // Initialize flash messages
 app.use(petRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // MongoDB connection
 const MONGODB_URI = "mongodb://127.0.0.1:27017/petAdoption";
@@ -291,6 +297,48 @@ app.post('/adoptpet/:petId', async (req, res) => {
         console.error('Error saving adoption details:', err);
         res.status(500).json({ message: 'Error saving adoption details', error: err.message });
     }
+});
+
+// Endpoint to handle bug report submissions
+app.post('/submit-bug-report', (req, res) => {
+    // Log incoming request data
+    console.log('Received request to submit bug report:', req.body);
+
+    const userName = req.body.name; // Make sure you use the correct field names
+    const userEmail = req.body.email;
+    const bugDescription = req.body.description;
+
+    // Log the values extracted from the request
+    console.log('User Name:', userName);
+    console.log('User Email:', userEmail);
+    console.log('Bug Description:', bugDescription);
+
+    const scriptPath = './script.sh';
+    const subject = 'Bug Report Submitted';
+    const content = `Dear ${userName},\n\nThank you for reporting a bug. Here are the details:\n\nDescription: ${bugDescription}\n\nThank You,\nTeam RescuePaws`;
+    const sendgridApiKey = process.env.SENDGRID_API;
+
+    // Log the command being executed
+    const command = `bash "${scriptPath}" "${userEmail}" "${subject}" "${content.replace(/\n/g, '\\n')}" "${sendgridApiKey}"`;
+    console.log('Executing command:', command);
+
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error executing script: ${error.message}`);
+            return res.status(500).send('Error sending bug report email.');
+        }
+
+        if (stderr) {
+            console.error(`Error output: ${stderr}`);
+            return res.status(500).send('Error sending bug report email.');
+        }
+
+        // Log the stdout from the script
+        console.log('Script output:', stdout);
+
+        // If email is sent successfully
+        res.status(200).send('Bug report submitted successfully!');
+    });
 });
 
 

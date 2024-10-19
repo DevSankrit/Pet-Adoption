@@ -176,6 +176,33 @@
             document.body.appendChild(form);
             form.submit();
         });
+        
+        //report submission
+        document.getElementById('bugReportForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const description = document.getElementById('bug-description').value;
+
+        const response = await fetch('/submit-bug-report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userName: name,
+                userEmail: email,
+                bugDescription: description,
+            }),
+        });
+
+        if (response.ok) {
+            alert('Bug report submitted successfully!');
+        } else {
+            alert('Failed to submit bug report.');
+        }
+    });
     </script>
 </body>
 </html>

@@ -41,10 +41,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // MongoDB connection
 const MONGODB_URI = "mongodb://127.0.0.1:27017/petAdoption";
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
+mongoose.connect(MONGODB_URI)
+.then(() => {
     console.log('MongoDB connected');
 }).catch(err => console.log('MongoDB connection error:', err));
 
@@ -69,11 +67,8 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
             return done(null, false, { message: 'No user found with that email' });
         }
 
-        console.log("Entered password:", password);
-        console.log("Stored hashed password:", user.password);
-
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log("Password match result:", isMatch);
+        console.log("Login Successfull", isMatch);
 
         if (!isMatch) {
             return done(null, false, { message: 'Incorrect password' });

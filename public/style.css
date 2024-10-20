@@ -43,7 +43,7 @@ body {
 }
 
 .left {
-  background-image: url("./pet.avif");
+  background-image: url("https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/pet.avif?alt=media&token=65d73230-a5ca-4b29-9511-323ae19127b7");
   background-size: cover;
   background-position: center;
   display: flex;

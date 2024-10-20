@@ -43,7 +43,7 @@ body {
   }
   
   .left {
-    background-image: url("pet2.webp");
+    background-image: url("https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/pet2.webp?alt=media&token=1c0a23fe-1cb0-420c-991c-2eafc65ab321");
     background-size: cover;
     background-position: center;
     display: flex;

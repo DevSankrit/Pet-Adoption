@@ -153,6 +153,9 @@ app.get('/success', (req, res) => {
 app.get('/petslist', (req, res) => {
     res.sendFile(__dirname + '/petsList.html');
 });
+app.get('/blog', (req, res) => {
+    res.sendFile(__dirname + '/blog.html');
+});
 
 app.get('/addpet', checkAuthenticated, (req, res) => {
     res.sendFile(__dirname + '/addpet.html');

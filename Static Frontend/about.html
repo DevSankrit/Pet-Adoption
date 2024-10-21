@@ -34,6 +34,39 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet" />
+    <style>
+ body, html {
+  overflow-x: hidden;
+}
+
+/* Adjusting row to prevent overflow and spacing issues */
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  margin-right: -15px; /* Adjust if necessary to prevent overflow */
+  margin-left: -15px;
+}
+
+.col-lg-3, .col-md-7 {
+  flex: 1;
+  max-width: 19%; /* Ensure they fit in one line without overflow */
+  padding: 15px; /* Reset default padding */
+}
+
+/* Remove excessive margin to avoid overflow */
+.team {
+  margin-bottom: 0;
+}
+
+/* Adjust the container width to avoid overflow */
+.container {
+  max-width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+    </style>
   </head>
 
   <body>
@@ -124,15 +157,15 @@
           id="navbarCollapse"
         >
           <div class="navbar-nav mr-auto py-0">
-            <a href="index.html" class="nav-item nav-link">Home</a>
-            <a href="about.html" class="nav-item nav-link active">About</a>
-            <a href="service.html" class="nav-item nav-link">Adoption</a>
+            <a href="/" class="nav-item nav-link">Home</a>
+            <a href="/about" class="nav-item nav-link active">About</a>
+            <a href="/service" class="nav-item nav-link">Adoption</a>
 
             <a href="/petslist" class="nav-item nav-link">Pet's list</a>
-            <a href="blog.html" class="nav-item nav-link">Blogs</a>
+            <a href="/blog" class="nav-item nav-link">Blogs</a>
           </div>
-          <a href="" class="btn btn-lg btn-primary px-3 d-none d-lg-block"
-            >Login /Signup</a
+          <a href="/login" class="btn btn-lg btn-primary px-3 d-none d-lg-block"
+            >Login / Signup</a
           >
         </div>
       </nav>
@@ -145,103 +178,81 @@
         <div class="col-lg-7 pb-5 pb-lg-0 px-3 px-lg-5">
           <h4 class="text-secondary mb-3">About Us</h4>
           <h1 class="display-4 mb-4">
-            <span class="text-primary">Boarding</span> &
-            <span class="text-secondary">Daycare</span>
+            <span class="text-primary">Adopt</span> &
+            <span class="text-secondary">Give a Home</span>
           </h1>
           <h5 class="text-muted mb-3">
-            We understand how much your pets mean to you. Our boarding and
-            daycare Adoption provide a safe, fun, and engaging environment,
-            ensuring your pet feels right at home while you’re away.
+            We are dedicated to helping pets find loving, forever homes. Our adoption
+            platform ensures a smooth process, connecting potential adopters with pets
+            who are looking for a family. Your perfect pet companion could be just a click away!
           </h5>
-
+    
           <ul class="list-inline">
             <li>
               <h5>
-                <i class="fa fa-check-double text-secondary mr-3"></i>Best In
-                Industry
+                <i class="fa fa-check-double text-secondary mr-3"></i>Trusted Adoption Platform
               </h5>
             </li>
             <li>
               <h5>
-                <i class="fa fa-check-double text-secondary mr-3"></i>Emergency
-                Services
+                <i class="fa fa-check-double text-secondary mr-3"></i>Health & Safety Assured
               </h5>
             </li>
             <li>
               <h5>
-                <i class="fa fa-check-double text-secondary mr-3"></i>24/7
-                Customer Support
+                <i class="fa fa-check-double text-secondary mr-3"></i>24/7 Support for Adopters
               </h5>
             </li>
           </ul>
-          <!-- <a href="" class="btn btn-lg btn-primary mt-3 px-4">Learn More</a> -->
+          <!-- <a href="/about" class="btn btn-lg btn-primary mt-3 px-4">Learn More</a> -->
         </div>
         <div class="col-lg-5">
           <div class="row px-3">
             <div class="col-12 p-0">
               <img class="img-fluid w-100" src="img/about-1.jpg" alt="" />
             </div>
-            <div class="col-6 p-0">
+            <!-- <div class="col-6 p-0">
               <img class="img-fluid w-100" src="img/about-2.jpg" alt="" />
             </div>
             <div class="col-6 p-0">
               <img class="img-fluid w-100" src="img/about-3.jpg" alt="" />
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
     </div>
+    
     <!-- About End -->
 
     <!-- Features Start -->
-    <div class="container-fluid bg-light">
-      <div class="container">
-        <div class="row align-items-center">
-          <div class="col-lg-5">
-            <img class="img-fluid w-100" src="img/feature.jpg" alt="" />
-          </div>
-          <div class="col-lg-7 py-5 py-lg-0 px-3 px-lg-5">
-            <h4 class="text-secondary mb-3">Why Choose Us?</h4>
-            <h1 class="display-4 mb-4">
-              <span class="text-primary">Special Care</span> On Pets
-            </h1>
-            <p class="mb-4">
-              We provide the highest standard of care, with trained staff and a
-              safe, loving environment. Whether your pet needs a vacation or
-              specialized care, we’re here for them!
-            </p>
-            <div class="row py-2">
-              <div class="col-6">
-                <div class="d-flex align-items-center mb-4">
-                  <h1
-                    class="flaticon-cat font-weight-normal text-secondary m-0 mr-3"
-                  ></h1>
-                  <h5 class="text-truncate m-0">Best In Industry</h5>
-                </div>
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-5">
+          <img class="img-fluid w-100" src="img/feature.jpg" alt="" />
+        </div>
+        <div class="col-lg-7 py-5 py-lg-0 px-3 px-lg-5">
+          <h4 class="text-secondary mb-3">Why Adopt With Us?</h4>
+          <h1 class="display-4 mb-4">
+            <span class="text-primary">Special Care</span> For Every Pet
+          </h1>
+          <p class="mb-4">
+            We ensure the highest standard of care for every pet. Our experienced team is dedicated to matching pets with loving homes and ensuring a smooth, supported adoption process.
+          </p>
+          <div class="row py-2">
+            <div class="col-6">
+              <div class="d-flex align-items-center mb-4">
+                <h1
+                  class="flaticon-cat font-weight-normal text-secondary m-0 mr-3"
+                ></h1>
+                <h5 class="text-truncate m-0">Trusted Adoption Process</h5>
               </div>
-              <div class="col-6">
-                <div class="d-flex align-items-center mb-4">
-                  <h1
-                    class="flaticon-doctor font-weight-normal text-secondary m-0 mr-3"
-                  ></h1>
-                  <h5 class="text-truncate m-0">Emergency Services</h5>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="d-flex align-items-center">
-                  <h1
-                    class="flaticon-care font-weight-normal text-secondary m-0 mr-3"
-                  ></h1>
-                  <h5 class="text-truncate m-0">Special Care</h5>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="d-flex align-items-center">
-                  <h1
-                    class="flaticon-dog font-weight-normal text-secondary m-0 mr-3"
-                  ></h1>
-                  <h5 class="text-truncate m-0">Customer Support</h5>
-                </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <h1
+                  class="flaticon-care font-weight-normal text-secondary m-0 mr-3"
+                ></h1>
+                <h5 class="text-truncate m-0">Expert Pet Care</h5>
               </div>
             </div>
           </div>
@@ -259,17 +270,17 @@
         </h1>
       </div>
       <div class="row">
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-7">
           <div
             class="team card position-relative overflow-hidden border-0 mb-4"
           >
-            <img class="card-img-top" src="img/team-1.jpg" alt="" />
+            <img class="card-img-top" src="https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/user-avatar-male-5.png?alt=media&token=7b839588-a044-4ddf-8d7e-f103cc0e1374" alt="" />
             <div class="card-body text-center p-0">
               <div
                 class="team-text d-flex flex-column justify-content-center bg-light"
               >
-                <h5>Alia</h5>
-                <i>Founder & CEO</i>
+                <h5>Kushagra</h5>
+                <i>Frontend</i>
               </div>
               <div
                 class="team-social d-flex align-items-center justify-content-center bg-dark"
@@ -302,17 +313,17 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-7">
           <div
             class="team card position-relative overflow-hidden border-0 mb-4"
           >
-            <img class="card-img-top" src="img/team-2.jpg" alt="" />
+            <img class="card-img-top" src="https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/user-avatar-male-5.png?alt=media&token=7b839588-a044-4ddf-8d7e-f103cc0e1374" alt="" />
             <div class="card-body text-center p-0">
               <div
                 class="team-text d-flex flex-column justify-content-center bg-light"
               >
-                <h5>Deepika</h5>
-                <i>Chef Executive</i>
+                <h5>Kumar Dev</h5>
+                <i>Backend</i>
               </div>
               <div
                 class="team-social d-flex align-items-center justify-content-center bg-dark"
@@ -345,17 +356,17 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-7">
           <div
             class="team card position-relative overflow-hidden border-0 mb-4"
           >
-            <img class="card-img-top" src="img/team-3.jpg" alt="" />
+            <img class="card-img-top" src="https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/user-avatar-male-5.png?alt=media&token=7b839588-a044-4ddf-8d7e-f103cc0e1374" alt="" />
             <div class="card-body text-center p-0">
               <div
                 class="team-text d-flex flex-column justify-content-center bg-light"
               >
-                <h5>Pradisha</h5>
-                <i>Doctor</i>
+                <h5>Mohit Patel</h5>
+                <i>Figma & Frontend</i>
               </div>
               <div
                 class="team-social d-flex align-items-center justify-content-center bg-dark"
@@ -388,17 +399,60 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-7">
           <div
             class="team card position-relative overflow-hidden border-0 mb-4"
           >
-            <img class="card-img-top" src="img/team-4.jpg" alt="" />
+            <img class="card-img-top" src="https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/user-avatar-male-5.png?alt=media&token=7b839588-a044-4ddf-8d7e-f103cc0e1374" alt="" />
             <div class="card-body text-center p-0">
               <div
                 class="team-text d-flex flex-column justify-content-center bg-light"
               >
-                <h5>Radha</h5>
-                <i>Trainer</i>
+                <h5>Navneet</h5>
+                <i>Database & Dataflow Analysis</i>
+              </div>
+              <div
+                class="team-social d-flex align-items-center justify-content-center bg-dark"
+              >
+                <a
+                  class="btn btn-outline-primary rounded-circle text-center mr-2 px-0"
+                  style="width: 36px; height: 36px"
+                  href="#"
+                  ><i class="fab fa-twitter"></i
+                ></a>
+                <a
+                  class="btn btn-outline-primary rounded-circle text-center mr-2 px-0"
+                  style="width: 36px; height: 36px"
+                  href="#"
+                  ><i class="fab fa-facebook-f"></i
+                ></a>
+                <a
+                  class="btn btn-outline-primary rounded-circle text-center mr-2 px-0"
+                  style="width: 36px; height: 36px"
+                  href="#"
+                  ><i class="fab fa-linkedin-in"></i
+                ></a>
+                <a
+                  class="btn btn-outline-primary rounded-circle text-center px-0"
+                  style="width: 36px; height: 36px"
+                  href="#"
+                  ><i class="fab fa-instagram"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-7">
+          <div
+            class="team card position-relative overflow-hidden border-0 mb-4"
+          >
+            <img class="card-img-top" src="https://firebasestorage.googleapis.com/v0/b/rescuehearts-51c89.appspot.com/o/user-avatar-male-5.png?alt=media&token=7b839588-a044-4ddf-8d7e-f103cc0e1374" alt="" />
+            <div class="card-body text-center p-0">
+              <div
+                class="team-text d-flex flex-column justify-content-center bg-light"
+              >
+                <h5>Milan</h5>
+                <i>Unix & Testing</i>
               </div>
               <div
                 class="team-social d-flex align-items-center justify-content-center bg-dark"
@@ -487,13 +541,13 @@
             <div class="col-md-4 mb-5">
               <h5 class="text-primary mb-4">Popular Links</h5>
               <div class="d-flex flex-column justify-content-start">
-                <a class="text-white mb-2" href="#"
+                <a class="text-white mb-2" href="/"
                   ><i class="fa fa-angle-right mr-2"></i>Home</a
                 >
-                <a class="text-white mb-2" href="about.html"
+                <a class="text-white mb-2" href="/about"
                   ><i class="fa fa-angle-right mr-2"></i>About Us</a
                 >
-                <a class="text-white mb-2" href="blog.html"
+                <a class="text-white mb-2" href="/blog"
                   ><i class="fa fa-angle-right mr-2"></i>Blogs</a
                 >
               </div>
